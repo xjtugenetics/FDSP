@@ -35,7 +35,7 @@ R packages: caret, methods, randomForest, doParallel, parallel
 
 # Preparation
 
-## Setup folder framework
+### Setup folder framework
 
 In /path/prep, there are three for calculating preparation. You MUST set them before starting calculation.
 
