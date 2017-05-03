@@ -1,0 +1,3 @@
+/home/cyx/project/ncSNP_DHS/locuszoom/data/1000G/genotypes/2010-11-23/AFR/chr8
+/home/cyx/project/ncSNP_DHS/locuszoom/data/1000G/genotypes/2010-11-23/AFR/chr11
+/home/cyx/project/ncSNP_DHS/locuszoom/data/1000G/genotypes/2010-11-23/AFR/chr9

@@ -1,0 +1,3 @@
+Element	File
+E003-H3K23ac	/path/E003-H3K23ac.bed
+E001-H3K27me3	/path/E001-H3K27me3.bed
