@@ -47,7 +47,7 @@ annotation.txt  files.txt  parameters.txt
 ```
 There are three files in this directory. These files include some files or options involving in scripts. You can use this procedure with defualt setting or editing and updating by youself.
 
-## Locate whole-genome SNPs files with position and MAF
+### Locate whole-genome SNPs files with position and MAF
 
 We provide series of files contating whole-genome SNPs information, including position, names and MAF provided by 1000 Genomes Project building on hg19(Human Genome version 19). You can also use files provided by youself. If you prepare files by youself, leave the format as example files and put the files into /path/extdata.
 
@@ -64,7 +64,7 @@ For the negative SNPs, we created four sets of SNPs with different distances to 
 
 Before starting labeled SNPs selection, please edit preparation files first.
 
-## Edit /path/prep/files.txt
+### Edit /path/prep/files.txt
 
 This file contains the list of files paths necessaried in analyses. 
 
@@ -85,7 +85,7 @@ If you have PLINK .bed/bim/fam files including all samples and all chromosomes i
 
 If you have multiple PLINK files devided by chromosomes, please create a file containing a list of PLINK .bed/bim/fam files. Then add the directory on bfile_list.
 
-## Calculate LD
+### Calculate LD
 
 ```
 cd /path/pre-prosessing/scripts
@@ -93,7 +93,7 @@ sh calculate_LD.sh
 ```
 PLEASE WAIT until this job finishes. LD calculating results store in data folder.
 
-## Select positive set
+### Select positive set
 
 ```
 cd /path/pre-prosessing/scripts
@@ -101,7 +101,7 @@ sh select_positive.sh
 ```
 You now have the positive set in bed format store in data folder.
 
-## Edit /path/prep/parameters.txt
+### Edit /path/prep/parameters.txt
 
 This file contains the list of parameters paths necessaried in analyses. 
 
@@ -121,7 +121,7 @@ Po_threshold limits the LD r-square value of SNPs included in positive set. SNPs
 
 Na_distant is the distance between SNPs in positive set and SNPs in selected negative set. I.e all SNPs will be devided into four sets SNPs with different distances to positive SNPs eg the maximum distance in each group was 40 kb, 200 kb, 1000 kb, and 5000 kb.
 
-## Select negative set
+### Select negative set
 
 ```
 cd /path/pre-prosessing/scripts
@@ -133,7 +133,7 @@ PLEASE WAIT until this job finishes. It may takes several hours. You will get th
 
 In this step, we provided a script of functional annotation. It can annotate all SNPs based on the epigenomic data (or any type of data in bed format).
 
-## Edit /path/prep/annotation.txt
+### Edit /path/prep/annotation.txt
 
 This file consist of a set of genomic elements which be used as features in establishing model. The genomic features could be genomic coordinates in bed format. For example, we have add the ChIP-seq peak data in bed format for histone marks.
 
@@ -143,7 +143,7 @@ E003-H3K23ac	/path/E003-H3K23ac.bed
 E001-H3K27me3	/path/E001-H3K27me3.bed
 ```
 
-## Annotate SNPs with features
+### Annotate SNPs with features
 
 ```
 cd /path/pre-prosessing/scripts
@@ -155,7 +155,7 @@ Now you get the results of annotation steps. You can train models with these res
 
 # Model generation, evaluation and optimization
 
-## Running FDSP package in R
+### Running FDSP package in R
 
 As an example, we are going to predict candidate risk SNPs of diabetes. We have annotated some SNPs with epigenomic elements for training model. We have also provided a example file including some function unknown SNPs to test the model.
 
@@ -170,7 +170,7 @@ save(SNPanno, file='example.SNPanno.Rda')
 Make sure the first column of input files is "SNP", as well as the last column is "status". "SNP" includes the name of known SNPs. "Status" 
 means the status of SNPs. Tag "1" means risk SNPs (positive set) and "0" means non-risk SNPs (negative set).
 
-## Filter features
+### Filter features
 
 Filtering high correlation features. Features lower than threshold remains for next step.
 
@@ -180,7 +180,7 @@ load(file.path(system.file('extdata', 'example.SNPanno.Rda', package='FDSP')))
 save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 ```
 
-## Create dataset
+### Create dataset
 
 Create train dataset and dataset after filtering high correlation features.
 
@@ -192,7 +192,7 @@ test_data<-dataset[[2]]
 save(dataset, file="example.dataset.Rda")
 ```
 
-## Train model
+### Train model
 
 Train a model with training set. Choose type of model and number of cross-validation you want. This package supports five types of model: CSimca(CSimca), KNN(knn), radial basis function kernel(svmRadial), C5.0(C5.0) and random forest(rf). You can choose type of model you want with changing "method" option(shown in brackets).
 
@@ -204,7 +204,7 @@ model <- model_train(SNPdatafilter, train_data, method="rf", numbercv = 5)
 save(model, file="example.model.Rda")
 ```
 
-## Model evaluation
+### Model evaluation
 
 Get prediction results, confusion matrix, F1 score and feature importance.
 
@@ -220,7 +220,7 @@ feature_importance <- evaluate_data[[4]]
 save(evaluate_data,  file='example.evaluate_data.Rda')
 ```
 
-## Select model
+### Select model
 
 Select a best-performed model with appropriate number of features.
 
