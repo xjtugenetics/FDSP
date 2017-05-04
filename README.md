@@ -98,7 +98,7 @@ Leave the format as is
 ```
 Para	Value
 r2_ld	0.1
-po_threshold	0.98
+po_threshold	0.8
 na_distant	40000,200000,1000000,5000000
 ```
 Users can use the default settings or update the values.
