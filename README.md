@@ -2,13 +2,7 @@
 
 # Introduction
 
-We developed functional disease-associated SNPs prediction (FDSP), a toolkit for predicting disease risk SNPs. Our tools includes two parts: pre-processing pipeline and FDSP package in R.
-
-Several scripts consist of pre-processing pipeline. These scripts perform calculating linkage disequilibrium(LD) and minor allele frequency(MAF), creating positive dataset and negative dataset according to lead SNPs of diseases, and annotating SNPs with epigenetics elements.
-
-FDSP package includes three sections: training set and test set creation, training prediction model with machine learning algorithm, and disease-associated SNPs prediction.
-
-FDSP is open source and can be run on different platforms.
+Genome-wide association studies (GWASs) is an effective strategy to identify susceptibility loci for human complex diseases. However, missing heritability is still a big problem. Here we developed a pipeline named functional disease-associated SNPs prediction (FDSP), to identify novel susceptibility loci for complex diseases based on the interpretation of the functional features for known disease-associated variants with machine learning.
 
 # License
 
@@ -32,7 +26,7 @@ R packages: caret, methods, randomForest, doParallel, parallel
 
 ### Setup folder framework
 
-In /path/prep, there are three for calculating preparation. You MUST set them before starting calculation.
+There are three files in the /path/prep directory. Users MUST set them or use the default files before starting calculation.
 
 ```
 cd /path/prep
@@ -40,11 +34,10 @@ vi files.txt
 ls
 annotation.txt  files.txt  parameters.txt
 ```
-There are three files in this directory. These files include some files or options involving in scripts. You can use this procedure with defualt setting or editing and updating by youself.
 
 ### Locate whole-genome SNPs files with position and MAF
 
-We provide series of files contating whole-genome SNPs information, including position, names and MAF provided by 1000 Genomes Project building on hg19(Human Genome version 19). You can also use files provided by youself. If you prepare files by youself, leave the format as example files and put the files into /path/extdata.
+We provide series of files contating whole-genome SNPs information, including position, names and MAF provided by 1000 Genomes Project building on hg19(Human Genome version 19). You can also use files provided by youself with the following format:
 
 ```
 (chr,position,rs ID, MAF)
@@ -61,9 +54,9 @@ Before starting labeled SNPs selection, please edit preparation files first.
 
 ### Edit /path/prep/files.txt
 
-This file contains the list of files paths necessaried in analyses. 
+This file contains the list of files paths necessary in analyses. 
 
-Leave the format as is
+Leave the format as is 
 
 ```
 File_pur	File_path
@@ -72,7 +65,7 @@ bfile	NA
 bfile_list	../exp/ldlist.txt
 ```
 
-Lead_SNPs is location of a file including lead SNPs associated with complex diseases found by previous GWASs. 
+Lead_SNPs.txt is location of a file including index SNPs associated with complex diseases found by previous GWASs. 
 
 We suggest you use PLINK genotype files of 1000 Genomes Project for calculating LD. Because the data could be very large so that computation speed may quitely slow, you can devide dataset into several files according to the positions of SNPs on chromosomes. You can locate a PLINK file or a directory including several PLINK files foe calculating LD.
 
@@ -108,13 +101,13 @@ r2_ld	0.1
 po_threshold	0.98
 na_distant	40000,200000,1000000,5000000
 ```
-All values should be updated by you.
+Users can use the default settings or update the values.
 
-R2_ld is the threshold of calculating LD at which SNPs are excluded from selecting negative set. I.e. if a SNP LD r-square with SNPs in the positive set is greater than eg 0.1, it is excluded from negative set.
+R2_ld is the threshold of calculating LD at which SNPs are excluded from selecting negative set. i.e. if a SNP LD r-square with SNPs in the positive set is greater than eg 0.1, it is excluded from negative set.
 
 Po_threshold limits the LD r-square value of SNPs included in positive set. SNPs with greater than eg 0.8 value of LD r-square with lead SNPs consist of positive set with lead SNPs. It is set as 0.8 in general.
 
-Na_distant is the distance between SNPs in positive set and SNPs in selected negative set. I.e all SNPs will be devided into four sets SNPs with different distances to positive SNPs eg the maximum distance in each group was 40 kb, 200 kb, 1000 kb, and 5000 kb.
+Na_distant is the distance between SNPs in positive set and SNPs in selected negative set. i.e all SNPs will be devided into four sets SNPs with different distances to positive SNPs eg the maximum distance in each group was 40 kb, 200 kb, 1000 kb, and 5000 kb.
 
 ### Select negative set
 
