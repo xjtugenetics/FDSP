@@ -8,7 +8,7 @@ r2=`grep "r2" ../prep/parameters.txt | cut -f2`
 
 ###############LD###########################
 
-if [ ${bfile} = ${NA} ]; then
+if [ ${bfile} = "NA" ]; then
 	cat ${bfile_list} | while read line; do 
 	file=${line}
 	file_n=`echo $file |awk -F '/' '{print $NF}'`
