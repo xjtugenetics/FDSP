@@ -20,7 +20,7 @@ You can contact yangtielin@mail.xjtu.edu.cn when you have any questions, suggest
 
 awk, R (>= 3.3.2), PLINK, bedtools
 
-R packages: caret, methods, randomForest, doParallel, parallel
+R packages: caret, methods, randomForest, doMC, parallel, rrcovHD, C50, kernlab, plyr, ROCR, mlbench, RSNNS
 
 # Preparation
 
@@ -143,19 +143,19 @@ Now you get the results of annotation steps. You can train models with these res
 
 # Model generation, evaluation and optimization
 
-### Running FDSP package in R
+### Running MP package in R
 
 As an example, we are going to predict candidate risk SNPs of diabetes. We have annotated some SNPs with epigenomic elements for training model. We have also provided a example file including some function unknown SNPs to test the model.
 
 Make sure you have installed FDSP package before running below commands.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-library('FDSP')
+library('MP')
 SNPanno<-read.csv(file.path(system.file('extdata', 'SNP_ori.csv', 
-			package="FDSP")), header=T)
+			package="MP")), header=T)
 save(SNPanno, file='example.SNPanno.Rda')
 ```
-Make sure the first column of input files is "SNP", as well as the last column is "status". "SNP" includes the name of known SNPs. "Status" 
+Make sure the first column of input files is "SNP", as well as the last column is "Class". "SNP" includes the name of known SNPs. "Class" 
 means the status of SNPs. Tag "1" means risk SNPs (positive set) and "0" means non-risk SNPs (negative set).
 
 ### Filter features
@@ -163,7 +163,7 @@ means the status of SNPs. Tag "1" means risk SNPs (positive set) and "0" means n
 Filtering high correlation features. Features lower than threshold remains for next step.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPanno.Rda', package='FDSP')))
+load(file.path(system.file('extdata', 'example.SNPanno.Rda', package='MP')))
  SNPdatafilter <- filter_features(SNPanno)
 save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 ```
@@ -173,33 +173,45 @@ save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 Create train dataset and dataset after filtering high correlation features.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='FDSP')))
+load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
 dataset<-create_dataset(SNPdatafilter,numbercv=5)
-train_data<-dataset[[1]]
-test_data<-dataset[[2]]
+no_cv <- 1
+test_data <- dataset[[no_cv]]
+train_data <- do.call(rbind, dataset[setdiff(1:length(dataset),no_cv)])
 save(dataset, file="example.dataset.Rda")
 ```
 
 ### Train model
 
-Train a model with training set. Choose type of model and number of cross-validation you want. This package supports five types of model: CSimca(CSimca), KNN(knn), radial basis function kernel(svmRadial), C5.0(C5.0) and random forest(rf). You can choose type of model you want with changing "method" option(shown in brackets).
+This step will select a best-performed model with appropriate number of features. You can choose type of model and number of cross-validation you want. This package supports to select the best performance model from four types of model: CSimca(CSimca), radial basis function kernel(svmRadial), C5.0(C5.0) and random forest(rf). You can just train a type of model you want with changing "method" option(shown in brackets).
+
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.dataset.Rda', package='FDSP')))
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='FDSP')))
-train_data<-dataset[[1]]
-model <- model_train(SNPdatafilter, train_data, method="rf", numbercv = 5)
+load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+model <-  model_train(SNPdatafilter,method="all", cores = 10,start=10, end=60, sep=10)
 save(model, file="example.model.Rda")
 ```
+
+
+```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
+load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+model <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, sep=10)
+save( model_single, file='example.model_single.Rda')
+```
+
+
+
 
 ### Model evaluation
 
 Get prediction results, confusion matrix, F1 score and feature importance.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.model.Rda', package='FDSP')))
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='FDSP')))
-test_data<-dataset[[2]]
+load(file.path(system.file('extdata', 'example.model.Rda', package='MP')))
+load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+dataset<-create_dataset(SNPdatafilter,numbercv=5)
+no_cv <- 1
+test_data <- dataset[[no_cv]]
 evaluate_data <- model_evaluate(model, test_data)
 prediction_results <- evaluate_data[[1]]
 confusion_matrix <- evaluate_data[[2]]
@@ -208,18 +220,6 @@ feature_importance <- evaluate_data[[4]]
 save(evaluate_data,  file='example.evaluate_data.Rda')
 ```
 
-### Select model
-
-Select a best-performed model with appropriate number of features.
-
-```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='FDSP')))
-load(file.path(system.file('extdata', 'example.evaluate_data.Rda', package='FDSP')))
-model_best_set<-select_features(SNPdatafilter,evaluate_data,from=10,to=100,sep=10)
-model_best <- model_best[[1]]
-feature_best <- model_best[[4]]
-save( model_best_set, file='example.model_best_set.Rda')
-```
 
 # Predict SNPs
 
@@ -229,15 +229,14 @@ Make sure the first column of customer files is "SNP".
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 test <- read.csv(file.path(system.file('extdata','test.csv',header=T)))
 rownames(test) <- test[,1]
-feature_best <- test[, feature_best ]
 predict_test <- SNP_predict(model_best,feature_best)
-predict_test
+save(predict_test, file='example.predict_test.Rda')
 ```
 
 # Save results
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-save(predict_test, file='example.predict_test.Rda')
+
 write.table(as.data.frame( predict_test), file='example.results.txt', row=T, col=F, quote=F, sep="\t")
 ```
 
