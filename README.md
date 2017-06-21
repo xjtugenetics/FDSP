@@ -147,12 +147,15 @@ Now you get the results of annotation steps. You can train models with these res
 
 As an example, we are going to predict candidate risk SNPs of diabetes. We have annotated some SNPs with epigenomic elements for training model. We have also provided a example file including some function unknown SNPs to test the model.
 
-Make sure you have installed FDSP package before running below commands.
+Make sure you have installed MP package before running below commands.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 library('MP')
 SNPanno<-read.csv(file.path(system.file('extdata', 'SNP_ori.csv', 
 			package="MP")), header=T)
+			
+rownames(SNPanno)<-SNPanno[,1]
+SNPanno <- SNPanno[, -1]
 save(SNPanno, file='example.SNPanno.Rda')
 ```
 Make sure the first column of input files is "SNP", as well as the last column is "Class". "SNP" includes the name of known SNPs. "Class" 
@@ -163,7 +166,7 @@ means the status of SNPs. Tag "1" means risk SNPs (positive set) and "0" means n
 Filtering high correlation features. Features lower than threshold remains for next step.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPanno.Rda', package='MP')))
+data(SNPdatafilter)
  SNPdatafilter <- filter_features(SNPanno)
 save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 ```
@@ -173,7 +176,7 @@ save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 Create train dataset and dataset after filtering high correlation features.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+data(SNPdatafilter)
 dataset<-create_dataset(SNPdatafilter,numbercv=5)
 no_cv <- 1
 test_data <- dataset[[no_cv]]
@@ -183,23 +186,28 @@ save(dataset, file="example.dataset.Rda")
 
 ### Train model
 
-This step will select a best-performed model with appropriate number of features. You can choose type of model and number of cross-validation you want. This package supports to select the best performance model from four types of model: CSimca(CSimca), radial basis function kernel(svmRadial), C5.0(C5.0) and random forest(rf). You can just train a type of model you want with changing "method" option(shown in brackets).
+This step will select a best-performed model with appropriate number of features. You can choose type of model and number of cross-validation you want. This package supports to select the best performance model from four types of model: CSimca(CSimca), radial basis function kernel(svmRadial), C5.0(C5.0) and random forest(rf). 
 
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+data(SNPdatafilter)
 model <-  model_train(SNPdatafilter,method="all", cores = 10,start=10, end=60, sep=10)
+model_best <- model$model
+feature_importance <- model$feature_importance
 save(model, file="example.model.Rda")
 ```
 
+You can just train a model you want with changing "method" option(shown in brackets). All avalible models show in https://topepo.github.io/caret/available-models.html
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+data(SNPdatafilter)
 model <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, sep=10)
 save( model_single, file='example.model_single.Rda')
 ```
 
+### Calculate a parameter FCi of SNP score S
 
+ In this step, you can input a matrix include SNP annotation and lable information to Calculate a parameter FCi of SNP score S. Its format is as same as SNPanno variable in 'Filter features' step.
 
 
 ### Model evaluation
@@ -207,8 +215,8 @@ save( model_single, file='example.model_single.Rda')
 Get prediction results, confusion matrix, F1 score and feature importance.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-load(file.path(system.file('extdata', 'example.model.Rda', package='MP')))
-load(file.path(system.file('extdata', 'example.SNPdatafilter.Rda', package='MP')))
+data(model)
+data(SNPdatafilter)
 dataset<-create_dataset(SNPdatafilter,numbercv=5)
 no_cv <- 1
 test_data <- dataset[[no_cv]]
@@ -227,9 +235,11 @@ Predict new candidate SNPs accroding to their epigenomic elements and trained mo
 Make sure the first column of customer files is "SNP".
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-test <- read.csv(file.path(system.file('extdata','test.csv',header=T)))
+data(model)
+test <- read.csv(file.path(system.file('extdata','test.csv', package='MP')),header=T)
 rownames(test) <- test[,1]
-predict_test <- SNP_predict(model_best,feature_best)
+test <- test[,-1]
+predict_test <- SNP_predict(model_best,test)
 save(predict_test, file='example.predict_test.Rda')
 ```
 
@@ -237,6 +247,6 @@ save(predict_test, file='example.predict_test.Rda')
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 
-write.table(as.data.frame( predict_test), file='example.results.txt', row=T, col=F, quote=F, sep="\t")
+write.table(as.data.frame( predict_test[[1]]), file='example.results.txt', row=T, col=F, quote=F, sep="\t")
 ```
 
