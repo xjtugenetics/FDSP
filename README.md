@@ -209,6 +209,12 @@ save( model_single, file='example.model_single.Rda')
 
  In this step, you can input a matrix include SNP annotation and lable information to Calculate a parameter FCi of SNP score S. Its format is as same as SNPanno variable in 'Filter features' step.
 
+```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
+data(SNPanno)
+score_f <- SNP_score(SNPanno)
+save(score_f, file='example.score_f.Rda')
+
+```
 
 ### Model evaluation
 
