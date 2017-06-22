@@ -205,10 +205,6 @@ model <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, se
 save( model_single, file='example.model_single.Rda')
 ```
 
-### Calculate a parameter FCi of SNP score S
-
- In this step, you can input a matrix include SNP annotation and lable information to Calculate a parameter FCi of SNP score S. Its format is as same as SNPanno variable in 'Filter features' step.
-
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 data(SNPanno)
 score_f <- SNP_score(SNPanno)
@@ -216,26 +212,7 @@ save(score_f, file='example.score_f.Rda')
 
 ```
 
-### Model evaluation
-
-Get prediction results, confusion matrix, F1 score and feature importance.
-
-```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-data(model)
-data(SNPdatafilter)
-dataset<-create_dataset(SNPdatafilter,numbercv=5)
-no_cv <- 1
-test_data <- dataset[[no_cv]]
-evaluate_data <- model_evaluate(model, test_data)
-prediction_results <- evaluate_data[[1]]
-confusion_matrix <- evaluate_data[[2]]
-F1_score <- evaluate_data[[3]]
-feature_importance <- evaluate_data[[4]]
-save(evaluate_data,  file='example.evaluate_data.Rda')
-```
-
-
-# Predict SNPs
+### Predict SNPs
 
 Predict new candidate SNPs accroding to their epigenomic elements and trained model.
 Make sure the first column of customer files is "SNP".
