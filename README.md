@@ -166,7 +166,7 @@ means the status of SNPs. Tag "1" means risk SNPs (positive set) and "0" means n
 Filtering high correlation features. Features lower than threshold remains for next step.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-data(SNPdatafilter)
+data(SNPanno)
  SNPdatafilter <- filter_features(SNPanno)
 save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 ```
@@ -201,15 +201,10 @@ You can just train a model you want with changing "method" option(shown in brack
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 data(SNPdatafilter)
-model <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, sep=10)
-save( model_single, file='example.model_single.Rda')
-```
-
-```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-data(SNPanno)
-score_f <- SNP_score(SNPanno)
-save(score_f, file='example.score_f.Rda')
-
+model_rf <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, sep=10)
+model_best <- model$model
+feature_importance <- model$feature_importance
+save( model_rf, file='example.model_single.Rda')
 ```
 
 ### Predict SNPs
