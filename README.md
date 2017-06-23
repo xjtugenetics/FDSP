@@ -166,7 +166,7 @@ means the status of SNPs. Tag "1" means risk SNPs (positive set) and "0" means n
 Filtering high correlation features. Features lower than threshold remains for next step.
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-data(SNPdatafilter)
+data(SNPanno)
  SNPdatafilter <- filter_features(SNPanno)
 save(SNPdatafilter, file="example.SNPdatafilter.Rda")
 ```
