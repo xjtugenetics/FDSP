@@ -205,13 +205,6 @@ model <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, se
 save( model_single, file='example.model_single.Rda')
 ```
 
-```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-data(SNPanno)
-score_f <- SNP_score(SNPanno)
-save(score_f, file='example.score_f.Rda')
-
-```
-
 ### Predict SNPs
 
 Predict new candidate SNPs accroding to their epigenomic elements and trained model.
