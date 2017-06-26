@@ -5,7 +5,6 @@
 #all_SNPs="/home/ys/bone_new_ld098/2_get_usresult/all_chr_snp_afeur_001_chr6"
 all_SNPs=`grep "all_SNPs_dir" ../prep/files.txt | cut -f2`
 positive_set="../data/positive_set.bed"
-
 echo "Loading files"
 
 ################PARAMETERs#############
@@ -20,38 +19,39 @@ echo "Start selecting...this step may takes several hours. Please wait until thi
 
 ################Start#################
 for  n in `seq 0 ${num}`;do
-
 #Prepare distant para
 
-list=(`grep "na_distant" ../prep/parameters.txt | cut -f2 | awk -F',' '{for(i=1;i<=NF;i++)print $i}'`)	
-dist=${list[${n}]}
+	list=(`grep "na_distant" ../prep/parameters.txt | cut -f2 | awk -F',' '{for(i=1;i<=NF;i++)print $i}'`)	
+	dist=${list[${n}]}
+
 #cat ${all_SNPs}/* > ../data/all_SNPs.maf
 
 #File preparation
-rm -f ../data/positive.csv.tmp
+	rm -f ../data/positive.csv.tmp
 
-cat ${positive_set} | while read line; do
-SNP=`echo ${line} | awk '{print $4}'`
-grep -w "${SNP}" ${all_SNPs}/* | sort | uniq -c | awk '{print $2}'  >> ../data/positive.csv.tmp
-done
-tmp_positive="../data/positive.csv.tmp"
+	cat ${positive_set} | while read line; do
+		SNP=`echo ${line} | awk '{print $4}'`
+		grep -w "${SNP}" ${all_SNPs}/* | sort | uniq -c | awk '{print $2}'  >> ../data/positive.csv.tmp
+	done
+	tmp_positive="../data/positive.csv.tmp"
 
 #Produce a single negative set file
 #cat ${positive_set} | while read line; do
-cat ${tmp_positive} | while read line; do
+	cat ${tmp_positive} | while read line; do
 #SNP=`echo ${line} | awk '{print $4}'`
 #position=`echo ${line} | awk '{print $3}'`
-position=`echo ${line} | cut -d ',' -f2`
-MAF=`echo ${line} |cut -d ',' -f4`
-chr=`echo ${line} |cut -d ',' -f1`
+		position=`echo ${line} | cut -d ',' -f2`
+		MAF=`echo ${line} |cut -d ',' -f4`
+		chr=`echo ${line} |awk  -F '[:,]+' '{print $(NF-3)}'`
 #MAF=`grep -w "${SNP}" ${all_SNPs}/* | cut -d ',' -f4`
-cat ${all_SNPs}/* | awk -F',' -v var=${chr} '{if($1==var) print $0}'  | awk -F',' -v var1=${position} -v var2=${MAF} -v var3=${dist} 'function abs(x) {return x <0 ? -x : x} OFS=","{if(abs($2-var1) <= var3 && abs($4-var2) <= 0.05 )print $0}'  >> ../data/negative_set_${dist}.tmp
-done
+		cat ${all_SNPs}/*.csv | awk -F',' -v var=${chr} '{if($1==var) print $0}'  | awk -F',' -v var1=${position} -v var2=${MAF} -v var3=${dist} 'function abs(x) {return x <0 ? -x : x} OFS=","{if(abs($2-var1) <= var3 && abs($4-var2) <= 0.05 )print $0}'  >> ../data/negative_set_${dist}.tmp
+	done
 
 
-cat ../data/negative_set_${dist}.tmp | sort | uniq -c | awk '{print $2}' > ../data/negative_set_${dist}.list.tmp
-f_list[${n}]=../data/negative_set_${dist}.list.tmp
-echo "Finished file ${dist}"
+	cat ../data/negative_set_${dist}.tmp | sort | uniq -c | awk '{print $2}' > ../data/negative_set_${dist}.list.tmp
+	f_list[${n}]=../data/negative_set_${dist}.list.tmp
+
+	echo "Finished file ${dist}"
 done
 
 #############Intersec##################
@@ -64,7 +64,7 @@ do
 	cat  ../data/negative_set_${i}.list.tmp ../ld/ld_0.1.tmp |  sort | uniq -d  >  ../data/dup.tmp
 	cat ../data/negative_set_${i}.list.tmp  ../data/dup.tmp | sort | uniq -u > ../data/negative_set_${i}.list
 	echo Finished intersection ${i}	
-	done
+done
 	
 
 #####################Proportion################

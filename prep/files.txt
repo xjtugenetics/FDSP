@@ -2,3 +2,4 @@ File_pur	File_path
 lead_SNPs	../exp/lead_SNPs.txt
 bfile	NA
 bfile_list	../exp/ldlist.txt
+all_SNPs_dir	../extdata
