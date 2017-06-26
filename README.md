@@ -191,7 +191,7 @@ This step will select a best-performed model with appropriate number of features
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 data(SNPdatafilter)
-model <-  model_train(SNPdatafilter,method="all", cores = 10,start=10, end=60, sep=10)
+model <-  model_train(SNPdatafilter,method="cv", model="all", cores = 10,start=10, end=60, sep=10)
 model_best <- model$model
 feature_importance <- model$feature_importance
 save(model, file="example.model.Rda")
@@ -201,10 +201,10 @@ You can just train a model you want with changing "method" option(shown in brack
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
 data(SNPdatafilter)
-model_rf <-  model_train(SNPdatafilter,method="rf", cores = 10,start=10, end=60, sep=10)
+model_rf <-  model_train(SNPdatafilter,method="cv", model="rf", cores = 10,start=10, end=60, sep=10)
 model_best <- model$model
 feature_importance <- model$feature_importance
-save( model_rf, file='example.model_single.Rda')
+save( model_rf, file='example.model_rf.Rda')
 ```
 
 ### Predict SNPs
@@ -217,14 +217,13 @@ data(model)
 test <- read.csv(file.path(system.file('extdata','test.csv', package='MP')),header=T)
 rownames(test) <- test[,1]
 test <- test[,-1]
-predict_test <- SNP_predict(model_best,test)
+predict_test <- SNP_predict(model,test)
 save(predict_test, file='example.predict_test.Rda')
 ```
 
 # Save results
 
 ```{r warning=FALSE, message=FALSE, tidy=TRUE, eval=FALSE}
-
-write.table(as.data.frame( predict_test[[1]]), file='example.results.txt', row=T, col=F, quote=F, sep="\t")
+write.table(predict_test, file='example.results.txt', row=F, col=T, quote=F, sep="\t")
 ```
 
